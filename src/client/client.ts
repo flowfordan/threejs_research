@@ -8,25 +8,19 @@ import {
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
 import * as GeometryUtils from 'three/examples/jsm/utils/GeometryUtils.js';
+import { mainLight, ambientLight } from './components/Lights';
+import worldPlane from './components/WorldPlane';
 
 
+//creating scene
+const mainScene = new THREE.Scene()
+mainScene.background = new THREE.Color( 0xffffff );
 
-const scene = new THREE.Scene()
-scene.background = new THREE.Color( 0xffffff );
+//adding lights
+mainScene.add(mainLight);
+mainScene.add(ambientLight);
 
-const light = new THREE.SpotLight()
-light.position.set(-12.5, 12.5, -12.5)
-light.castShadow = true
-light.shadow.mapSize.width = 1024
-light.shadow.mapSize.height = 1024
-light.shadow.radius = 2;
-light.intensity = 0.8;
-scene.add(light)
-
-const amLight = new THREE.AmbientLight()
-amLight.intensity = 0.3;
-scene.add(amLight)
-
+//creating camera 
 const camera = new THREE.PerspectiveCamera(
     75, 
     window.innerWidth / window.innerHeight, 
@@ -36,14 +30,14 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(8, 6, 8)
 
 
-
+//renderer
 const renderer = new THREE.WebGLRenderer()
 renderer.shadowMap.enabled = true
 renderer.outputEncoding = THREE.sRGBEncoding
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
-
+//renderer for labels
 const labelRenderer = new CSS2DRenderer()
 labelRenderer.setSize(window.innerWidth, window.innerHeight)
 labelRenderer.domElement.style.position = 'absolute'
@@ -54,11 +48,14 @@ document.body.appendChild(labelRenderer.domElement)
 
 const pickableObjects: THREE.Mesh[] = []
 
+//adding world plane
+mainScene.add(worldPlane);
 
+//controls of camera
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 
-
+//scene geometry
 const geometry = new THREE.BoxGeometry()
 const material = new THREE.MeshStandardMaterial({
     color: 0x0000ff,
@@ -66,17 +63,12 @@ const material = new THREE.MeshStandardMaterial({
 })
 
 const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
-cube.receiveShadow = true
-cube.castShadow = true
+mainScene.add(cube);
+cube.receiveShadow = true;
+cube.castShadow = true;
 
 
-var geo = new THREE.PlaneBufferGeometry(2000, 2000, 8, 8);
-var mat = new THREE.MeshStandardMaterial({ color: 0xcbcbcb, side: THREE.DoubleSide });
-var worldPlane = new THREE.Mesh(geo, mat);
-worldPlane.rotateX( - Math.PI / 2);
-scene.add(worldPlane);
-worldPlane.receiveShadow = true
+
 
 pickableObjects.push(worldPlane)
 
@@ -99,7 +91,7 @@ const myLine = new Line2(geomLine, matLine);
 
 myLine.computeLineDistances();
 
-scene.add(myLine);
+mainScene.add(myLine);
 
 
 //test line
@@ -136,8 +128,8 @@ window.addEventListener('keyup', function (event) {
         renderer.domElement.style.cursor = 'pointer'
         if (drawingLine) {
             //delete the last line because it wasn't committed
-            scene.remove(line)
-            scene.remove(measurementLabels[lineId])
+            mainScene.remove(line)
+            mainScene.remove(measurementLabels[lineId])
             drawingLine = false
         }
     }
@@ -174,7 +166,7 @@ function onClick() {
                     })
                 )
                 line.frustumCulled = false
-                scene.add(line)
+                mainScene.add(line)
 
                 const measurementDiv = document.createElement(
                     'div'
@@ -184,7 +176,7 @@ function onClick() {
                 const measurementLabel = new CSS2DObject(measurementDiv)
                 measurementLabel.position.copy(intersects[0].point)
                 measurementLabels[lineId] = measurementLabel
-                scene.add(measurementLabels[lineId])
+                mainScene.add(measurementLabels[lineId])
                 drawingLine = true
             } else {
                 //finish the line
@@ -253,7 +245,7 @@ function animate() {
 }
 
 function render() {
-    labelRenderer.render(scene, camera)
-    renderer.render(scene, camera)
+    labelRenderer.render(mainScene, camera)
+    renderer.render(mainScene, camera)
 }
 animate()
