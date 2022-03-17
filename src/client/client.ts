@@ -8,19 +8,23 @@ import {
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
 import * as GeometryUtils from 'three/examples/jsm/utils/GeometryUtils.js';
-import { mainLight, ambientLight } from './components/Lights';
+import { mainLight, ambientLight, hemiLight, dirLight } from './components/Lights';
 import worldPlane from './components/WorldPlane';
+import { gridHelper } from './components/PlaneHelper';
 
 
 //creating scene
 const mainScene = new THREE.Scene()
 mainScene.background = new THREE.Color( 0xffffff );
 
-//adding lights
-mainScene.add(mainLight);
-mainScene.add(ambientLight);
+//LIGHTS
 
-//creating camera 
+// mainScene.add(mainLight);
+// mainScene.add(ambientLight);
+mainScene.add(hemiLight);
+mainScene.add(dirLight);
+
+//CAMERA 
 const camera = new THREE.PerspectiveCamera(
     75, 
     window.innerWidth / window.innerHeight, 
@@ -48,8 +52,9 @@ document.body.appendChild(labelRenderer.domElement)
 
 const pickableObjects: THREE.Mesh[] = []
 
-//adding world plane
+//adding WORLD PLANE
 mainScene.add(worldPlane);
+mainScene.add( gridHelper );
 
 //controls of camera
 const controls = new OrbitControls(camera, renderer.domElement)
