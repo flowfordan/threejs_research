@@ -8,7 +8,9 @@ import camera from './components/Camera';
 import { GUI } from 'three/examples/jsm/libs/dat.gui.module';
 import {renderer, labelRenderer} from './components/Renderers';
 import { cube, myLine, myLine2 } from './components/Geometry';
-
+import { myPoint } from './assets/Point';
+import createPoint from './actions/createPoint';
+import createLine from './actions/createLine';
 
 
 //creating scene
@@ -35,18 +37,6 @@ const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
 
 //scene geometry
-const pointGeometry = new THREE.BufferGeometry()
-
-const vertices = new Float32Array( [5, 5, 5] );
-const colors = new Float32Array( [120, 230, 150] );
-
-
-// itemSize = 3 because there are 3 values (components) per vertex
-pointGeometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-pointGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 4))
-
-const myPoint = new THREE.Points(pointGeometry)
-
 mainScene.add(cube, myLine2, myLine, myPoint);
 
 
@@ -56,15 +46,13 @@ pickableObjects.push(worldPlane)
 
 
 
-
-
-
-
 //GUI
 const gui = new GUI()
 const actionsFolder = gui.addFolder('Actions')
-let createPointBtn = {Create_Point: function(){console.log('button to create point')}};
+let createPointBtn = {Create_Point: createPoint};
+let createLineBtn = {Create_Line: createLine};
 actionsFolder.add(createPointBtn, 'Create_Point')
+actionsFolder.add(createLineBtn, 'Create_Line')
 actionsFolder.open()
 
 
@@ -96,3 +84,5 @@ function render() {
     renderer.render(mainScene, camera)
 }
 animate()
+
+export default mainScene

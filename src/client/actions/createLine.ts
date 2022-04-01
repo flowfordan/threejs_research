@@ -2,29 +2,39 @@ import * as THREE from 'three';
 import camera from '../components/Camera';
 import mainScene from '../client'
 import {renderer} from '../components/Renderers'
+import createPoint from './createPoint'
 
 
 let mouse = new THREE.Vector2()
 let raycaster = new THREE.Raycaster();
 
 
-let PointService = {
+let LineService = {
     status: 0,
     coords: new THREE.Vector3( ),
 }
 
 
-const createPoint = () => {
-    PointService.status = 0;
+const createLine = () => {
+
     console.log('start func')
-    window.addEventListener( 'pointermove', onMouseMove );
-    window.addEventListener( 'pointerdown', onMouseDown );
+    createPoint
+    //if
+    updateLine()
+    
     
 }
 
 
-const onMouseMove = (event: any) => {
+const updateLine = () => {
+    console.log('upd START')
+    window.addEventListener( 'pointermove', onLineUpd );
+    window.addEventListener( 'pointerdown', onLineEnd );
 
+}
+
+const onLineUpd = (event: any) => {
+    console.log('line creating')
     event.preventDefault();
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -39,30 +49,30 @@ const onMouseMove = (event: any) => {
         if(intersects[i].object.name === 'ground'){
             renderer.domElement.style.cursor = 'crosshair'
            console.log('GROUND coord', intersects[i].point)
-           PointService.coords = intersects[i].point;
+           LineService.coords = intersects[i].point;
         }
 
         else{renderer.domElement.style.cursor = 'not-allowed'}
 
     }
 	
-    if(PointService.status === 1){
+    if(LineService.status === 1){
         return
     }
 
 }
 
-const onMouseDown = () => {
+const onLineEnd = () => {
     renderer.domElement.style.cursor = 'default'
-    PointService.status = 1;
+    LineService.status = 1;
     //get coords
     //set point
     console.log('CREATE POINT')
-    console.log('POINT COORD', PointService.coords)
+    console.log('POINT COORD', LineService.coords)
 
 
     const pointGeometry = new THREE.BufferGeometry()
-    const vertices = new Float32Array( [PointService.coords.x, 0, PointService.coords.z] );
+    const vertices = new Float32Array( [LineService.coords.x, 0, LineService.coords.z] );
     const material = new THREE.PointsMaterial( { color: 0x0066ff, size: 0.5 } );
     material.depthTest = false
     material.depthWrite = false
@@ -71,9 +81,9 @@ const onMouseDown = () => {
 
     mainScene.add(myPoint)
 
-    window.removeEventListener( 'pointermove', onMouseMove );
-    window.removeEventListener( 'pointerdown', onMouseDown );
+    window.removeEventListener( 'pointermove', onLineUpd );
+    window.removeEventListener( 'pointerdown', onLineEnd );
     return
 }
 
-export default createPoint;
+export default createLine;

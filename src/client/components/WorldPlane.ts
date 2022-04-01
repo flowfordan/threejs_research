@@ -6,5 +6,6 @@ var worldPlaneMaterial = new THREE.MeshStandardMaterial({ color: 0xcbcbcb, side:
 var worldPlane = new THREE.Mesh(worldPlaneGeometry, worldPlaneMaterial);
 worldPlane.rotateX( - Math.PI / 2);
 worldPlane.receiveShadow = true;
+worldPlane.name = 'ground';
 
 export default worldPlane;
