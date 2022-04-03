@@ -15,7 +15,7 @@ cube.position.set(0, 5, 0)
 
 
 let coord = [10, 0.02, 10, 10, 0.02, 25];
-let coord2 = [5, 0.02, 10, 5, 0.02, 45];
+let coord2 = [5, 0.02, 10, 5, 0.02, 45, 20, 0.02, 20];
 
 const geomLine = new LineGeometry();
 geomLine.setPositions(coord);
@@ -26,8 +26,11 @@ geomLine2.setPositions(coord2);
 const matLine = new LineMaterial({
     color: 10,
     linewidth: 2,
-    resolution: new THREE.Vector2(640, 480) // resolution of the viewport
-  // dashed, dashScale, dashSize, gapSize
+    resolution: new THREE.Vector2(640, 480), // resolution of the viewport
+    dashed: true,
+    dashScale: 2,
+    dashSize: 2,
+    gapSize: 1
 
 });
 
@@ -36,5 +39,6 @@ const myLine = new Line2(geomLine, matLine);
 const myLine2 = new Line2(geomLine2, matLine);
 
 myLine.computeLineDistances();
+myLine2.computeLineDistances();
 
 export {cube, myLine, myLine2}

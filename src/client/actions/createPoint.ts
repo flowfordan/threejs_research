@@ -15,7 +15,6 @@ let PointService = {
 
 
 const createPoint = () => {
-    PointService.status = 0;
     console.log('start func')
     window.addEventListener( 'pointermove', onMouseMove );
     window.addEventListener( 'pointerdown', onMouseDown );
@@ -70,7 +69,7 @@ const onMouseDown = () => {
     const myPoint = new THREE.Points(pointGeometry, material)
 
     mainScene.add(myPoint)
-
+    PointService.status = 0;
     window.removeEventListener( 'pointermove', onMouseMove );
     window.removeEventListener( 'pointerdown', onMouseDown );
     return
