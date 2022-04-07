@@ -4,8 +4,8 @@ const camera = new THREE.PerspectiveCamera(
     75, 
     window.innerWidth / window.innerHeight, 
     0.1, 
-    1000)
+    2000)
 
-camera.position.set(15, 15, 15)
+camera.position.set(30, 30, 30)
 
 export default camera

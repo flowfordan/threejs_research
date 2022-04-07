@@ -16,7 +16,7 @@ export const basicLineDashed = new LineMaterial({
 
 export const basicLineSolid = new LineMaterial({
     color: 10,
-    linewidth: 1,
+    linewidth: 0.8,
     resolution: new THREE.Vector2(640, 480),
     dashed: false,
     dashScale: 2,

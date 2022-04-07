@@ -1,41 +1,39 @@
-import { basicLineSolid, basicLineDashed } from './../materials/lines/LinesMaterial';
 import * as THREE from 'three';
 import camera from '../components/Camera';
 import mainScene from '../client'
 import {renderer} from '../components/Renderers'
 import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
+import { basicLineSolid, basicLineDashed } from './../materials/lines/LinesMaterial';
+import { basicPointMat } from '../materials/points/PointsMaterial';
 
 
 let mouse = new THREE.Vector2()
 let raycaster = new THREE.Raycaster();
-
-//line to draw
-let coords: Array<number> = [0, 0.1,0, 0, 0.1,0]
-const geomLine = new LineGeometry();
-geomLine.setPositions(coords);
-const custLine = new Line2(geomLine, basicLineDashed);
-
+const gZero = 0.15 //Z(vertical) level for lines & points
 
 interface LineData {
     status: number,
     coordsPoint: Float32Array,
-    coordsNum: Array<number>
+    coordsLine: Float32Array,
 }
 
 let LineService: LineData = {
-    status: 0, //0-started func, 1- created first point, 2 - created second point
+    //0-started func, 1- created first point, 2 - created second point
+    status: 0, 
     coordsPoint: new Float32Array(3),
-    coordsNum: new Array()
-
+    coordsLine: new Float32Array([0, gZero,0, 0, gZero,0]),
 }
 
+//line to draw
+const geomLine = new LineGeometry();
+geomLine.setPositions(LineService.coordsLine);
+const custLine = new Line2(geomLine, basicLineDashed);
 
-const createLine = () => {
+
+const createLine = (): void => {
     console.log('start func')
-    
     window.addEventListener( 'pointermove', onMouseMove );
-    window.addEventListener( 'pointerdown', onMouseDown );
-    
+    window.addEventListener( 'pointerdown', onMouseDown );  
 }
 
 const onMouseMove = (event: any) => {
@@ -46,43 +44,36 @@ const onMouseMove = (event: any) => {
     
 
     // calculate objects intersecting the picking ray
-    
     const intersects = raycaster.intersectObjects( mainScene.children );
 
     if(LineService.status === 0){
         for (let i = 0; i < intersects.length; i++){
             if(intersects[i].object.name === 'ground'){
-                renderer.domElement.style.cursor = 'crosshair'
-            //console.log('GROUND coord 1', intersects[i].point)
-            //conver vector 3 to coord x y z
-                LineService.coordsNum = [intersects[i].point.x, 0, intersects[i].point.z]
-
-                LineService.coordsPoint[0] = intersects[i].point.x
-                LineService.coordsPoint[1] = 0
-                LineService.coordsPoint[2] = intersects[i].point.z
-                
+                renderer.domElement.style.cursor = 'crosshair';
+                LineService.coordsPoint = Float32Array.from([
+                    intersects[i].point.x, 
+                    gZero, 
+                    intersects[i].point.z])
             }
             else{renderer.domElement.style.cursor = 'not-allowed'}
         }
     }
 
     
-	
     if(LineService.status === 1){
         for (let i = 0; i < intersects.length; i++){
             if(intersects[i].object.name === 'ground'){
                 renderer.domElement.style.cursor = 'crosshair'
-                //console.log('GROUND coord 2', intersects[i].point)
-                //conver vector 3 to coord x y z
-                LineService.coordsNum = [intersects[i].point.x, 0, intersects[i].point.z]
 
-                LineService.coordsPoint[0] = intersects[i].point.x
-                LineService.coordsPoint[1] = 0
-                LineService.coordsPoint[2] = intersects[i].point.z
+                LineService.coordsPoint = Float32Array.from([
+                    intersects[i].point.x, 
+                    gZero, 
+                    intersects[i].point.z])
 
-                coords[3] = LineService.coordsNum[0]
-                coords[5] = LineService.coordsNum[2]
-                geomLine.setPositions(coords);
+                LineService.coordsLine[3] = LineService.coordsPoint[0]
+                LineService.coordsLine[5] = LineService.coordsPoint[2]
+
+                geomLine.setPositions(LineService.coordsLine);
                 
                 mainScene.add(custLine)
                 custLine.computeLineDistances();
@@ -99,29 +90,27 @@ const onMouseDown = () => {
     
     if(LineService.status === 0){
     
-        
         LineService.status = 1;
         
         //create point
-        const pointGeometry = new THREE.BufferGeometry()
-        const vertices = new Float32Array( LineService.coordsPoint );
+        const pointGeometry = new THREE.BufferGeometry();
+        const vertices = LineService.coordsPoint;
         console.log('CREATE POINT 1', LineService.coordsPoint)
-        const material = new THREE.PointsMaterial( { color: 0x0066ff, size: 0.5 } );
-        material.depthTest = false
-        material.depthWrite = false
         pointGeometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-        const myPoint = new THREE.Points(pointGeometry, material)
-        mainScene.add(myPoint)
+        const myPoint = new THREE.Points(pointGeometry, basicPointMat);
+        mainScene.add(myPoint);
 
-        
-        //add line
-        coords[0] = LineService.coordsNum[0]
-        coords[2] = LineService.coordsNum[2]
-        coords[3] = LineService.coordsNum[0]
-        coords[5] = LineService.coordsNum[2]
-        geomLine.setPositions(coords);
+        //add line change init 000-000 to 111-111
+        //[coordsPoint, coordPoint]
+        LineService.coordsLine = Float32Array.from([
+            ...LineService.coordsPoint,
+            ...LineService.coordsPoint
+        ])
+
+        geomLine.setPositions(LineService.coordsLine);
+
+        console.log('coordLINE', LineService.coordsLine)
         return
-
     } 
     
 
@@ -129,36 +118,28 @@ const onMouseDown = () => {
         //create 2 point and exit
         //second point
         const pointGeometry = new THREE.BufferGeometry()
-        const vertices = new Float32Array( 
-            [LineService.coordsPoint[0], 
-            LineService.coordsPoint[1], 
-            LineService.coordsPoint[2]] );
+        const vertices = Float32Array.from(LineService.coordsPoint)
         console.log(LineService.coordsPoint)
-        const material = new THREE.PointsMaterial( { color: 0x0066ff, size: 0.5 } );
-        material.depthTest = false
-        material.depthWrite = false
+
         pointGeometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-        const myPoint = new THREE.Points(pointGeometry, material)
+        const myPoint = new THREE.Points(pointGeometry, basicPointMat)
         mainScene.add(myPoint)
 
 
-        
-
-        //let coords: Array<number> = [...LineService.coordsPoint]
-
-        const geomLine = new LineGeometry();
-        geomLine.setPositions(coords)
-        
+        //delete helping line
         mainScene.remove(custLine)
+
+        //add final line
+        const geomLine = new LineGeometry();
+        geomLine.setPositions(LineService.coordsLine)
         const finLine = new Line2(geomLine, basicLineSolid);
         mainScene.add(finLine)
         
 
         console.log('exit')
         LineService.status = 0;
-        coords = [0, 0.1,0, 0, 0.1,0]
-        LineService.coordsPoint = new Float32Array()
-        LineService.coordsNum = new Array
+        LineService.coordsLine = new Float32Array([0, gZero,0, 0, gZero,0]),
+        LineService.coordsPoint = new Float32Array(3)
         window.removeEventListener( 'pointermove', onMouseMove );
         window.removeEventListener( 'pointerdown', onMouseDown );
         renderer.domElement.style.cursor = 'default'
@@ -169,6 +150,5 @@ const onMouseDown = () => {
     
 }
 
-   
 
 export default createLine;
