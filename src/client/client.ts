@@ -47,12 +47,16 @@ pickableObjects.push(worldPlane)
 
 
 //GUI
-const gui = new GUI()
+const gui = new GUI({name: 'Controls'})
 const actionsFolder = gui.addFolder('Actions')
 let createPointBtn = {Create_Point: createPoint};
 let createLineBtn = {Create_Line: createLine};
-actionsFolder.add(createPointBtn, 'Create_Point')
-actionsFolder.add(createLineBtn, 'Create_Line')
+let coordinatesGUI = {message: 'sample'}
+
+
+actionsFolder.add(createPointBtn, 'Create_Point').name("Draw Point")
+actionsFolder.add(createLineBtn, 'Create_Line').name("Draw Line")
+actionsFolder.add(coordinatesGUI, 'message').name("X:Y:Z")
 actionsFolder.open()
 
 

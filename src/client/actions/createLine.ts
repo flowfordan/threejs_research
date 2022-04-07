@@ -1,39 +1,20 @@
+import { basicLineSolid, basicLineDashed } from './../materials/lines/LinesMaterial';
 import * as THREE from 'three';
 import camera from '../components/Camera';
 import mainScene from '../client'
 import {renderer} from '../components/Renderers'
-import createPoint from './createPoint';
 import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
+
 
 let mouse = new THREE.Vector2()
 let raycaster = new THREE.Raycaster();
 
 //line to draw
-let coords: Array<number> = [0,0,0, 0,0,0]
+let coords: Array<number> = [0, 0.1,0, 0, 0.1,0]
 const geomLine = new LineGeometry();
 geomLine.setPositions(coords);
-const matLine = new LineMaterial({
-    color: 0xff22ff,
-    linewidth: 5,
-    resolution: new THREE.Vector2(640, 480),
-    dashed: true,
-    dashScale: 2,
-    dashSize: 2,
-    gapSize: 1
+const custLine = new Line2(geomLine, basicLineDashed);
 
-});
-
-const matLineSolid = new LineMaterial({
-    color: 10,
-    linewidth: 2,
-    resolution: new THREE.Vector2(640, 480),
-    dashed: false,
-    dashScale: 2,
-    dashSize: 2,
-    gapSize: 1
-});
-
-const custLine = new Line2(geomLine, matLine);
 
 interface LineData {
     status: number,
@@ -42,7 +23,7 @@ interface LineData {
 }
 
 let LineService: LineData = {
-    status: 0, //0-not started, 1- created 1 point, 2 - created 2 point
+    status: 0, //0-started func, 1- created first point, 2 - created second point
     coordsPoint: new Float32Array(3),
     coordsNum: new Array()
 
@@ -51,8 +32,10 @@ let LineService: LineData = {
 
 const createLine = () => {
     console.log('start func')
+    
     window.addEventListener( 'pointermove', onMouseMove );
     window.addEventListener( 'pointerdown', onMouseDown );
+    
 }
 
 const onMouseMove = (event: any) => {
@@ -102,7 +85,6 @@ const onMouseMove = (event: any) => {
                 geomLine.setPositions(coords);
                 
                 mainScene.add(custLine)
-
                 custLine.computeLineDistances();
                 return
 
@@ -133,7 +115,6 @@ const onMouseDown = () => {
 
         
         //add line
-        // let start: Array<number> = [0, 0, 0];
         coords[0] = LineService.coordsNum[0]
         coords[2] = LineService.coordsNum[2]
         coords[3] = LineService.coordsNum[0]
@@ -168,19 +149,21 @@ const onMouseDown = () => {
         const geomLine = new LineGeometry();
         geomLine.setPositions(coords)
         
-        const custLine = new Line2(geomLine, matLineSolid);
-        mainScene.add(custLine)
+        mainScene.remove(custLine)
+        const finLine = new Line2(geomLine, basicLineSolid);
+        mainScene.add(finLine)
         
 
         console.log('exit')
         LineService.status = 0;
-        coords = [0,0,0,0,0,0,]
+        coords = [0, 0.1,0, 0, 0.1,0]
         LineService.coordsPoint = new Float32Array()
         LineService.coordsNum = new Array
         window.removeEventListener( 'pointermove', onMouseMove );
         window.removeEventListener( 'pointerdown', onMouseDown );
         renderer.domElement.style.cursor = 'default'
         console.log(LineService)
+        console.log(mainScene)
         return
     } 
     
