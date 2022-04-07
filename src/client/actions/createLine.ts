@@ -5,10 +5,12 @@ import {renderer} from '../components/Renderers'
 import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
 import { basicLineSolid, basicLineDashed } from './../materials/lines/LinesMaterial';
 import { basicPointMat } from '../materials/points/PointsMaterial';
+import { Sphere, Vector3 } from 'three';
 
 
 let mouse = new THREE.Vector2()
 let raycaster = new THREE.Raycaster();
+let snap = 1
 const gZero = 0.15 //Z(vertical) level for lines & points
 
 interface LineData {
@@ -50,12 +52,38 @@ const onMouseMove = (event: any) => {
         for (let i = 0; i < intersects.length; i++){
             if(intersects[i].object.name === 'ground'){
                 renderer.domElement.style.cursor = 'crosshair';
-                LineService.coordsPoint = Float32Array.from([
+
+                //snapping
+                const bSphere = new Sphere(new Vector3(
+                    intersects[i].point.x, 
+                    gZero, 
+                    intersects[i].point.z), snap)
+                
+                //10
+                //nearest
+                let roundX = Math.round(intersects[i].point.x / 10) * 10;
+                let roundY = Math.round(intersects[i].point.z / 10) * 10;
+
+                console.log(roundX, roundY)
+                console.log(bSphere.containsPoint(new Vector3(roundX, gZero, roundY)))
+                
+                if(bSphere.containsPoint(new Vector3(roundX, gZero, roundY))){
+                    LineService.coordsPoint = Float32Array.from([roundX, gZero, roundY])
+                } else {
+                    LineService.coordsPoint = Float32Array.from([
                     intersects[i].point.x, 
                     gZero, 
                     intersects[i].point.z])
+                console.log('coordinates', intersects[i].point.x, intersects[i].point.z)
+                }
+                
+
+
+                
             }
-            else{renderer.domElement.style.cursor = 'not-allowed'}
+            else{
+                renderer.domElement.style.cursor = 'not-allowed';
+            }
         }
     }
 
